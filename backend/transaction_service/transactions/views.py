@@ -1,19 +1,19 @@
-from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-import requests
-from user_service.accounts.models import User
+import requests, json
 from decimal import Decimal, InvalidOperation
-from models import Transactions, Balance
 
 # Create your views here.
+@csrf_exempt
 def send(request):
     if request.method != 'POST':
         return JsonResponse({"error": "POST method required"}, status=405)
 
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    amount = request.POST.get('amount')
-    receiver_name = request.POST.get('receiverName')          
+    data = json.loads(request.body)
+    username = data.get('username')
+    password = data.get('password')
+    amount = data.get('amount')
+    receiver_name = data.get('receiverName')          
     
     if not all([username, password, amount, receiver_name]):
         return JsonResponse({"error": "Missing required fields"}, status=400)
@@ -27,55 +27,110 @@ def send(request):
 
     # Get sender from user service
     user_response = requests.get(
-        'http://user/profile/',
-        params={'username': username, 'password': password}
+    'http://127.0.0.1:8000/user/profile/',
+    params={'username': username, 'password': password}
     )
     if user_response.status_code != 200:
         return JsonResponse({'error': 'Invalid sender credentials'}, status=404)
-    user_data = user_response.json()
-
+    
     # Get receiver from user service
     receiver_response = requests.get(
-        'http://user/profile/',
+        'http://127.0.0.1:8000/user/profile/',
         params={'username': receiver_name}
     )
     if receiver_response.status_code != 200:
-        return JsonResponse({'error': 'Receiver not found'}, status=404)
+        return JsonResponse({'error': 'Receiver not found'}, status=404)    
+        
+    user_data = user_response.json()
     receiver_data = receiver_response.json()
-    
-    try:
-        user_balance = Decimal(user_data['balance'])
-        receiver_balance = Decimal(receiver_data['balance'])
-    except (KeyError, InvalidOperation):
-        return JsonResponse({'error': 'Invalid balance data'}, status=500)
-    
-    if user_balance < amount:
-        return JsonResponse({"error": "Insufficent funds"}, status=401)
-    
-    try:
-        sender_balance_obj = Balance.objects.get(username=username)
-        receiver_balance_obj = Balance.objects.get(username=receiver_name)
-    except Balance.DoesNotExist:
-        return JsonResponse({'error': 'Balance record not found'}, status=404)
-    
-    sender_balance_obj.amount -= amount
-    receiver_balance_obj.amount += amount
 
-    sender_balance_obj.save()
-    receiver_balance_obj.save()
+    user_balance = Decimal(user_data['balance'])
+    receiver_balance = Decimal(receiver_data['balance'])
+
+    if user_balance < amount:
+        return JsonResponse({"error": "Insufficent funds"}, status=401)       
+    
+    user_balance-=amount
+    receiver_balance+=amount
+    
+    updateBalance(username, user_balance)
+    updateBalance(receiver_name, receiver_balance)
 
     return JsonResponse({
         "message": "Transaction successful",
-        "updated_balance": str(sender_balance_obj.amount)
+        "updated_balance": str(user_balance)
     })            
 
 
-def receive(request):    
-    return JsonResponse({"error": "POST method required"}, status=405)
+@csrf_exempt
+def receive(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    data = json.loads(request.body)
+    username = data.get('username')
+    password = data.get('password')
+    amount = data.get('amount')
+    sender_name = data.get('senderName')          
+    
+    if not all([username, password, amount, sender_name]):
+        return JsonResponse({"error": "Missing required fields"}, status=400)
+
+    try:
+        amount = Decimal(amount)
+        if amount < 0:
+            return JsonResponse({'error': 'wrong input'}, status=500)
+    except (InvalidOperation, TypeError):
+        return JsonResponse({"error": "Invalid amount"}, status=400)
+
+    # Get sender from user service
+    user_response = requests.get(
+    'http://127.0.0.1:8000/user/profile/',
+    params={'username': username, 'password': password}
+    )
+    if user_response.status_code != 200:
+        return JsonResponse({'error': 'Invalid sender credentials'}, status=404)
+    
+    # Get receiver from user service
+    sender_response = requests.get(
+        'http://127.0.0.1:8000/user/profile/',
+        params={'username': sender_name}
+    )
+    if sender_response.status_code != 200:
+        return JsonResponse({'error': 'Receiver not found'}, status=404)    
+        
+    user_data = user_response.json()
+    sender_data = sender_response.json()
+
+    user_balance = Decimal(user_data['balance'])
+    sender_balance = Decimal(sender_data['balance'])
+
+    if sender_balance < amount:
+        return JsonResponse({"error": "Insufficent funds"}, status=401)       
+    
+    user_balance+=amount
+    sender_balance-=amount
+    
+    updateBalance(username, user_balance)
+    updateBalance(sender_name, sender_balance)
+
+    return JsonResponse({
+        "message": "Transaction successful",
+        "updated_balance": str(user_balance)
+    })     
 
 
-def updateBalance(request):
-    return JsonResponse({"error" : "POST method required"}, status=400)
+@csrf_exempt
+def updateBalance(username, balance):
+    if not all([username, balance]):
+        return JsonResponse({"error": "Missing required fields for update"}, status=400)
+
+    user_update_response = requests.post(
+        'http://127.0.0.1:8000/user/update/',
+        json={'username': username, 'balance':str(balance)}
+    )
+    if user_update_response.status_code != 200:
+        return JsonResponse({'error': "Couldn't update user balance"}, status=404) 
 
 
 def logs(request):    
