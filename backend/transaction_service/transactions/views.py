@@ -2,6 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import requests, json
 from decimal import Decimal, InvalidOperation
+from .models import Transactions, Logs
 
 # Create your views here.
 @csrf_exempt
@@ -55,6 +56,8 @@ def send(request):
     
     updateBalance(username, user_balance)
     updateBalance(receiver_name, receiver_balance)
+
+    saveTransaction(sender=username, receiver=receiver_name, amount=amount)
 
     return JsonResponse({
         "message": "Transaction successful",
@@ -114,6 +117,8 @@ def receive(request):
     updateBalance(username, user_balance)
     updateBalance(sender_name, sender_balance)
 
+    saveTransaction(sender=sender_name, receiver=username, amount=amount)
+
     return JsonResponse({
         "message": "Transaction successful",
         "updated_balance": str(user_balance)
@@ -133,6 +138,23 @@ def updateBalance(username, balance):
         return JsonResponse({'error': "Couldn't update user balance"}, status=404) 
 
 
-def logs(request):    
-    return JsonResponse({'error': 'GET method required'}, status=405)
+def saveTransaction(sender, receiver, amount):    
+    if not all ([sender, receiver, amount]):
+        return JsonResponse({'error saving transaction': 'missing required field'}, status=400)
+    
+    try:
+        transaction = Transactions.objects.create(sender=sender, receiver=receiver, amount=amount)
+        return log(transaction_id=transaction.id)
+    except Exception as e:
+        return JsonResponse({'error saving transaction': str(e)}, status=500)    
 
+
+def log(transaction_id):        
+    if not transaction_id:
+        return JsonResponse({'error in logs': 'transacrion is null'}, status=405)
+    
+    try:
+        Logs.objects.create(transaction_id=transaction_id)
+        return JsonResponse({'message': 'transaction was logged successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error in logs': str(e)}, status=500)

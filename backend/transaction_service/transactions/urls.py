@@ -5,5 +5,5 @@ urlpatterns = [
     path('transaction/send', views.send, name='send'),
     path('transaction/receive', views.receive, name='receive'),
     path('transaction/updateBalance', views.updateBalance, name='updateBalance'),
-    path('transaction/logs', views.logs, name='logs'),
+    path('transaction/logs', views.Logs, name='logs'),
 ]
