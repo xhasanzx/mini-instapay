@@ -158,3 +158,25 @@ def log(transaction_id):
         return JsonResponse({'message': 'transaction was logged successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error in logs': str(e)}, status=500)
+
+
+@csrf_exempt
+def getTransactions(request):
+    if request.method != "GET":
+        return JsonResponse({'error':'get method required'})    
+
+    data = json.loads(request.body)
+    if data['username']:
+        username = data['username']
+
+        sent_transactions = Transactions.objects.get(sender=username)
+        received_transactions = Transactions.objects.get(receiver=username)
+
+        return JsonResponse({
+            "sent_transactions":sent_transactions,
+            "received_transactions":received_transactions
+            }, status=200)
+    
+    allTransactions = Transactions.objects.all()
+    return JsonResponse({"allTransactions": allTransactions}, status=200)
+        
