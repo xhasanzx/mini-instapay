@@ -1,0 +1,29 @@
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - user_service
+
+  user_service:
+    build: ./backend/user_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/user_service:/app
+
+  transaction_service:
+    build: ./backend/transaction_service
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend/transaction_service:/app
+
+  reporting_service:
+    build: ./backend/reporting_service
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./backend/reporting_service:/app
