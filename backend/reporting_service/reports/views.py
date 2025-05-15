@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
 from django.views.decorators.csrf import csrf_exempt
 
 
+@csrf_exempt
 def analyzeSent(request): 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=405)
@@ -16,7 +17,7 @@ def analyzeSent(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8000/transactions/getTransactions/',
+            'http://127.0.0.1:8001/transactions/getTransactions/',
             params={'username': username}
         )
         if response.status_code != 200:
@@ -46,6 +47,7 @@ def analyzeSent(request):
     })
 
 
+@csrf_exempt
 def analyzeReceived(request): 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=405)
@@ -58,7 +60,7 @@ def analyzeReceived(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8000/transactions/getTransactions/',
+            'http://127.0.0.1:8001/transactions/getTransactions/',
             params={'username': username}
         )
         if response.status_code != 200:

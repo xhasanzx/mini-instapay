@@ -188,10 +188,8 @@ def getLogs(request):
     if request.method != "GET":
         return JsonResponse({'error':'get method required'})    
 
-    data = json.loads(request.body)
-    if data['username']:
-        username = data['username']
-
+    username = request.GET.get('username')
+    if username:
         sent_transactions = Logs.objects.filter(sender=username).values()
         received_transactions = Logs.objects.filter(receiver=username).values()
 
