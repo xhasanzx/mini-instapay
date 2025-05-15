@@ -1,18 +1,13 @@
 from django.http import JsonResponse
 from .models import User
 from django.views.decorators.csrf import csrf_exempt
+from decimal import Decimal, InvalidOperation
 import json
 
 # Create your views here.
 def home(request):        
     return JsonResponse({"message": "Welcome to the homepage"})
 
-def mockUsers():
-    User.objects.create(
-        username="hassan", 
-        password="hassan", 
-        balance=3000
-    )
     
 def getAllUsers(request):    
     if request.method == 'GET':       
@@ -30,6 +25,7 @@ def getAllUsers(request):
             return JsonResponse({"error": "User not found"}, status=404)
     
     return JsonResponse({"error": "GET method required"}, status=400)
+    
     
 def logIn(request):
     if request.method == 'POST':
@@ -74,16 +70,26 @@ def viewAccount(request):
         
     return JsonResponse({"error": "GET method required"}, status=400)
 
+
 @csrf_exempt
 def updateUser(request):
     if request.method != 'POST':
         return JsonResponse({"error": "POST method required"}, status=405)
     try:
         data = json.loads(request.body)
-        
         username = data.get('username')    
         balance = data.get('balance')
-
+        
+        if not all([username, balance]):
+            return JsonResponse({"error": "Missing required fields"}, status=400)
+        
+        try:
+            balance = Decimal(balance)
+            if balance < 0:
+                return JsonResponse({"error": "Balance cannot be negative"}, status=400)
+        except (InvalidOperation, TypeError):
+            return JsonResponse({"error": "Invalid balance"}, status=400)
+    
         user = User.objects.get(username=username)
 
         user.balance = balance

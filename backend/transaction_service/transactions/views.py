@@ -2,9 +2,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import requests, json
 from decimal import Decimal, InvalidOperation
-from .models import Transactions, Logs
+from .models import Logs
 
-# Create your views here.
+
 @csrf_exempt
 def send(request):
     if request.method != 'POST':
@@ -54,8 +54,8 @@ def send(request):
     user_balance-=amount
     receiver_balance+=amount
     
-    updateBalance(username, user_balance)
-    updateBalance(receiver_name, receiver_balance)
+    addBalance(username, user_balance)
+    addBalance(receiver_name, receiver_balance)
 
     saveTransaction(sender=username, receiver=receiver_name, amount=amount)
 
@@ -114,8 +114,8 @@ def receive(request):
     user_balance+=amount
     sender_balance-=amount
     
-    updateBalance(username, user_balance)
-    updateBalance(sender_name, sender_balance)
+    addBalance(username, user_balance)
+    addBalance(sender_name, sender_balance)
 
     saveTransaction(sender=sender_name, receiver=username, amount=amount)
 
@@ -126,16 +126,49 @@ def receive(request):
 
 
 @csrf_exempt
-def updateBalance(username, balance):
+def addBalance(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    data = json.loads(request.body)
+    username = data.get('username')
+    balance = data.get('balance')
+    
     if not all([username, balance]):
         return JsonResponse({"error": "Missing required fields for update"}, status=400)
 
+    try:
+        balance = Decimal(balance)
+        if balance <= 0:
+            return JsonResponse({"error": "Balance cannot be negative or zero"}, status=400)
+    except (InvalidOperation, TypeError):
+        return JsonResponse({"error": "Invalid balance"}, status=400)
+
+    get_user_response = requests.get(
+        'http://127.0.0.1:8000/user/profile/',
+        json={'username':username}
+    )
+    
+    if get_user_response.status_code != 200:
+        return JsonResponse({'error': "Couldn't get user balance"}, status=404)
+    
+    user_data = get_user_response.json()
+    
+    newBalance = Decimal(user_data['balance']) + balance
+    
     user_update_response = requests.post(
         'http://127.0.0.1:8000/user/update/',
-        json={'username': username, 'balance':str(balance)}
+        json={'username': username, 'balance': newBalance}
     )
+    
     if user_update_response.status_code != 200:
         return JsonResponse({'error': "Couldn't update user balance"}, status=404) 
+    
+    return JsonResponse({
+        'message': 'balance updated successfully',
+        'username': username,
+        'oldBalance': str(user_data['balance']),
+        'newBalance': str(newBalance)}, status=200)
 
 
 def saveTransaction(sender, receiver, amount):    
@@ -143,25 +176,14 @@ def saveTransaction(sender, receiver, amount):
         return JsonResponse({'error saving transaction': 'missing required field'}, status=400)
     
     try:
-        transaction = Transactions.objects.create(sender=sender, receiver=receiver, amount=amount)
-        return log(transaction_id=transaction.id)
+        Logs.objects.create(sender=sender, receiver=receiver, amount=amount)
+        return JsonResponse({'message': 'transaction was logged successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error saving transaction': str(e)}, status=500)    
 
 
-def log(transaction_id):        
-    if not transaction_id:
-        return JsonResponse({'error in logs': 'transacrion is null'}, status=405)
-    
-    try:
-        Logs.objects.create(transaction_id=transaction_id)
-        return JsonResponse({'message': 'transaction was logged successfully'}, status=200)
-    except Exception as e:
-        return JsonResponse({'error in logs': str(e)}, status=500)
-
-
 @csrf_exempt
-def getTransactions(request):
+def getLogs(request):
     if request.method != "GET":
         return JsonResponse({'error':'get method required'})    
 
@@ -169,14 +191,13 @@ def getTransactions(request):
     if data['username']:
         username = data['username']
 
-        sent_transactions = Transactions.objects.get(sender=username)
-        received_transactions = Transactions.objects.get(receiver=username)
+        sent_transactions = Logs.objects.filter(sender=username).values()
+        received_transactions = Logs.objects.filter(receiver=username).values()
 
         return JsonResponse({
-            "sent_transactions":sent_transactions,
-            "received_transactions":received_transactions
+            "sent_transactions": list(sent_transactions),
+            "received_transactions": list(received_transactions)
             }, status=200)
     
-    allTransactions = Transactions.objects.all()
+    allTransactions = list(Logs.objects.all().values())
     return JsonResponse({"allTransactions": allTransactions}, status=200)
-        

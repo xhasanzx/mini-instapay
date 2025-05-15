@@ -1,10 +1,8 @@
-from django.shortcuts import render
 import json, requests
 from django.http import JsonResponse
 from decimal import Decimal, InvalidOperation
 from django.views.decorators.csrf import csrf_exempt
 
-# Create your views here.
 
 def analyzeSent(request): 
     if request.method != 'POST':
@@ -47,7 +45,7 @@ def analyzeSent(request):
         'receiver_frequencies': users
     })
 
-        
+
 def analyzeReceived(request): 
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=405)
