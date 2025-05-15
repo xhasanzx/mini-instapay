@@ -17,11 +17,11 @@ def analyzeSent(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8001/transactions/logs/',
+            'http://127.0.0.1:8001/transaction/logs/',
             params={'username': username}
         )
         if response.status_code != 200:
-            return JsonResponse({'error': 'Failed to fetch transactions'}, status=500)
+            return JsonResponse({'error': 'Failed to fetch transactions for'}, status=500)
 
         transactions_data = response.json()
         sent = transactions_data.get('sent_transactions', [])
@@ -60,7 +60,7 @@ def analyzeReceived(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8001/transactions/logs/',
+            'http://127.0.0.1:8001/transaction/logs/',
             params={'username': username}
         )
         if response.status_code != 200:
