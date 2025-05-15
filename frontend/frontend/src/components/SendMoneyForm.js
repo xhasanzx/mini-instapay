@@ -32,7 +32,7 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
         setReceiverName("");
         // Update balance for the sender
         if (data.updated_balance) {
-          await fetch("http://localhost:8001/transaction/updateBalance", {
+          await fetch("http://localhost:8001/transaction/addBalance", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -77,10 +77,33 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
             required
           />
         </div>
-        {success && <div className="success">{success}</div>}
-        {error && <div className="error">{error}</div>}
-        <button type="submit" disabled={loading}>
-          {loading ? "Sending..." : "Send"}
+        {success && (
+          <div
+            className="success"
+            style={{ color: "green", marginBottom: "1rem" }}
+          >
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="error" style={{ color: "red", marginBottom: "1rem" }}>
+            {error}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            backgroundColor: loading ? "#ccc" : "#007bff",
+            cursor: loading ? "not-allowed" : "pointer",
+            padding: "0.5rem 1rem",
+            borderRadius: "4px",
+            border: "none",
+            color: "white",
+            fontWeight: "bold",
+          }}
+        >
+          {loading ? "Sending..." : "Send Money"}
         </button>
       </form>
     </div>

@@ -21,12 +21,27 @@ const Dashboard = () => {
       setLoading(true);
       setError("");
       try {
-        const response = await fetch(
-          `http://localhost:8001/transaction/logs?username=${user.username}`
-        );
+        const response = await fetch("http://localhost:8001/transaction/logs", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username: user.username }),
+        });
         const data = await response.json();
         if (response.ok) {
-          setLogs(data.logs || data);
+          // Combine sent and received transactions
+          const allTransactions = [
+            ...(data.sent_transactions || []),
+            ...(data.received_transactions || []),
+          ];
+          // Sort by timestamp if available
+          allTransactions.sort((a, b) => {
+            const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+            const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+            return dateB - dateA;
+          });
+          setLogs(allTransactions);
         } else {
           setError(data.error || "Failed to fetch transaction logs");
         }
@@ -184,10 +199,14 @@ const Dashboard = () => {
                 <tbody>
                   {logs.map((log, idx) => (
                     <tr key={idx}>
-                      <td>{log.timestamp || log.date || ""}</td>
+                      <td>
+                        {log.timestamp
+                          ? new Date(log.timestamp).toLocaleString()
+                          : "N/A"}
+                      </td>
                       <td>{log.sender}</td>
                       <td>{log.receiver}</td>
-                      <td>{log.amount} EGP</td>
+                      <td>{parseFloat(log.amount).toFixed(2)} EGP</td>
                       <td>
                         {log.sender === user.username
                           ? "Sent"

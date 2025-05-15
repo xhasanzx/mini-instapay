@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from .models import User
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from decimal import Decimal, InvalidOperation
 import json
 
@@ -27,6 +27,7 @@ def getAllUsers(request):
     return JsonResponse({"error": "GET method required"}, status=400)
     
     
+@ensure_csrf_cookie
 def logIn(request):
     if request.method == 'POST':
         try:
@@ -49,6 +50,9 @@ def logIn(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+    elif request.method == 'GET':
+        # Return CSRF token for GET requests
+        return JsonResponse({"message": "CSRF cookie set"})
     
     return JsonResponse({"error": "POST method required"}, status=400)
 
