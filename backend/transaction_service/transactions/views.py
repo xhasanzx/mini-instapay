@@ -54,8 +54,8 @@ def send(request):
     user_balance-=amount
     receiver_balance+=amount
     
-    addBalance(username, user_balance)
-    addBalance(receiver_name, receiver_balance)
+    updateBalance(username, user_balance)
+    updateBalance(receiver_name, receiver_balance)
 
     saveTransaction(sender=username, receiver=receiver_name, amount=amount)
 
@@ -114,8 +114,8 @@ def receive(request):
     user_balance+=amount
     sender_balance-=amount
     
-    addBalance(username, user_balance)
-    addBalance(sender_name, sender_balance)
+    updateBalance(username, user_balance)
+    updateBalance(sender_name, sender_balance)
 
     saveTransaction(sender=sender_name, receiver=username, amount=amount)
 
@@ -171,7 +171,7 @@ def addBalance(request):
         'newBalance': str(newBalance)}, status=200)
 
 
-@csrf_exempt
+
 def saveTransaction(sender, receiver, amount):    
     if not all ([sender, receiver, amount]):
         return JsonResponse({'error saving transaction': 'missing required field'}, status=400)
@@ -200,3 +200,21 @@ def getLogs(request):
     
     allTransactions = list(Logs.objects.all().values())
     return JsonResponse({"allTransactions": allTransactions}, status=200)
+
+
+@csrf_exempt
+def updateBalance(username, balance):
+    if not all([username, balance]):
+        return JsonResponse({'error': 'Missing required fields'}, status=400)
+            
+    try:
+        update_user_response = requests.get(
+            'http://127.0.0.1:8000/user/update/',
+            params={'username': username, 'balance': balance}
+        )
+        if update_user_response.status_code != 200:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        
+        return JsonResponse({'message': 'Balance updated successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

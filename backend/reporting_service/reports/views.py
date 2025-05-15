@@ -10,14 +10,14 @@ def analyzeSent(request):
         return JsonResponse({'error': 'POST method required'}, status=405)
 
     try:
-        data = json.loads(request.body)
+        data = json.loads(request.body)        
         username = data['username']
     except (KeyError, ValueError):
         return JsonResponse({'error': 'Invalid input'}, status=400)
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8001/transactions/getTransactions/',
+            'http://127.0.0.1:8001/transactions/logs/',
             params={'username': username}
         )
         if response.status_code != 200:
@@ -60,7 +60,7 @@ def analyzeReceived(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8001/transactions/getTransactions/',
+            'http://127.0.0.1:8001/transactions/logs/',
             params={'username': username}
         )
         if response.status_code != 200:
