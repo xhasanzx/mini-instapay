@@ -15,7 +15,7 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
     setSuccess("");
     setError("");
     try {
-      const response = await fetch("http://localhost:8001/transaction/send", {
+      const response = await fetch("http://localhost:8001/transaction/send/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -32,7 +32,7 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
         setReceiverName("");
         // Update balance for the sender
         if (data.updated_balance) {
-          await fetch("http://localhost:8001/transaction/addBalance", {
+          await fetch("http://localhost:8001/transaction/addBalance/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

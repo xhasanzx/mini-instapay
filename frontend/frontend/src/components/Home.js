@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import SendMoneyForm from "./SendMoneyForm";
 import RequestMoneyForm from "./RequestMoneyForm";
-import TransactionLogs from "./TransactionLogs";
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -18,7 +17,7 @@ const Home = () => {
       try {
         if (user && user.username && user.password) {
           const response = await fetch(
-            `http://localhost:8000/user/profile?username=${user.username}&password=${user.password}`
+            `http://localhost:8000/user/profile?username=${user.username}&password=${user.password}/`
           );
           const data = await response.json();
           if (response.ok) {

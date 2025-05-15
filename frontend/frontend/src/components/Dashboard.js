@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import "./Dashboard.css";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -14,6 +15,14 @@ const Dashboard = () => {
     highest: 0,
     lowest: 0,
   });
+  const [sentAnalysis, setSentAnalysis] = useState({
+    total_sent: 0,
+    receiver_frequencies: {},
+  });
+  const [receivedAnalysis, setReceivedAnalysis] = useState({
+    total_received: 0,
+    sender_frequencies: {},
+  });
   const [activeTab, setActiveTab] = useState("transactions");
 
   useEffect(() => {
@@ -21,24 +30,18 @@ const Dashboard = () => {
       setLoading(true);
       setError("");
       try {
-        const response = await fetch("http://localhost:8001/transaction/logs", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username: user.username }),
-        });
+        const response = await fetch(
+          `http://localhost:8001/transaction/logs/?username=${user.username}`
+        );
         const data = await response.json();
         if (response.ok) {
-          // Combine sent and received transactions
           const allTransactions = [
             ...(data.sent_transactions || []),
             ...(data.received_transactions || []),
           ];
-          // Sort by timestamp if available
           allTransactions.sort((a, b) => {
-            const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
-            const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+            const dateA = a.time ? new Date(a.time) : new Date(0);
+            const dateB = b.time ? new Date(b.time) : new Date(0);
             return dateB - dateA;
           });
           setLogs(allTransactions);
@@ -51,7 +54,69 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    if (user && user.username) fetchLogs();
+
+    const fetchReports = async () => {
+      try {
+        // Fetch sent analysis
+        const sentResponse = await fetch(
+          "http://localhost:8002/reports/sent/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ username: user.username }),
+            credentials: "include",
+          }
+        );
+
+        if (!sentResponse.ok) {
+          throw new Error(`Sent analysis failed: ${sentResponse.statusText}`);
+        }
+
+        const sentData = await sentResponse.json();
+        setSentAnalysis(sentData);
+
+        // Fetch received analysis
+        const receivedResponse = await fetch(
+          "http://localhost:8002/reports/received/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ username: user.username }),
+            credentials: "include",
+          }
+        );
+
+        if (!receivedResponse.ok) {
+          throw new Error(
+            `Received analysis failed: ${receivedResponse.statusText}`
+          );
+        }
+
+        const receivedData = await receivedResponse.json();
+        setReceivedAnalysis(receivedData);
+
+        // Update report with the new data
+        setReport((prevReport) => ({
+          ...prevReport,
+          totalSent: sentData.total_sent || 0,
+          totalReceived: receivedData.total_received || 0,
+        }));
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+        setError(err.message || "Failed to fetch reports");
+      }
+    };
+
+    if (user && user.username) {
+      fetchLogs();
+      fetchReports();
+    }
   }, [user]);
 
   useEffect(() => {
@@ -72,8 +137,8 @@ const Dashboard = () => {
         if (amt < lowest) lowest = amt;
       });
       setReport({
-        totalSent,
-        totalReceived,
+        totalSent: sentAnalysis.total_sent,
+        totalReceived: receivedAnalysis.total_received,
         count: logs.length,
         highest: highest === Number.MIN_VALUE ? 0 : highest,
         lowest: lowest === Number.MAX_VALUE ? 0 : lowest,
@@ -90,136 +155,149 @@ const Dashboard = () => {
   }, [logs, user]);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar */}
-      <nav
-        className="dashboard-sidebar"
-        style={{
-          width: "220px",
-          background: "#222",
-          color: "#fff",
-          display: "flex",
-          flexDirection: "column",
-          padding: "2rem 1rem",
-        }}
-      >
-        <h2 style={{ color: "#fff", marginBottom: "2rem" }}>Dashboard</h2>
+    <div className="dashboard-container">
+      <nav className="dashboard-sidebar">
+        <h2>Dashboard</h2>
         <button
-          className={activeTab === "transactions" ? "active" : ""}
-          style={{
-            background:
-              activeTab === "transactions" ? "#007bff" : "transparent",
-            color: "#fff",
-            border: "none",
-            padding: "1rem",
-            textAlign: "left",
-            cursor: "pointer",
-            marginBottom: "1rem",
-            borderRadius: "4px",
-            fontWeight: "bold",
-          }}
+          className={`sidebar-button ${
+            activeTab === "transactions" ? "active" : ""
+          }`}
           onClick={() => setActiveTab("transactions")}
         >
           Transactions
         </button>
         <button
-          className={activeTab === "reports" ? "active" : ""}
-          style={{
-            background: activeTab === "reports" ? "#007bff" : "transparent",
-            color: "#fff",
-            border: "none",
-            padding: "1rem",
-            textAlign: "left",
-            cursor: "pointer",
-            marginBottom: "1rem",
-            borderRadius: "4px",
-            fontWeight: "bold",
-          }}
+          className={`sidebar-button ${
+            activeTab === "reports" ? "active" : ""
+          }`}
           onClick={() => setActiveTab("reports")}
         >
           Reports
         </button>
-        <Link
-          to="/"
-          style={{
-            color: "#fff",
-            textDecoration: "none",
-            padding: "1rem",
-            borderRadius: "4px",
-            background: "transparent",
-            fontWeight: "bold",
-          }}
-        >
+        <Link to="/" className="sidebar-link">
           Home
         </Link>
       </nav>
-      {/* Main Content */}
-      <div style={{ flex: 1, padding: "2rem" }}>
-        <h2 style={{ marginBottom: "2rem" }}>Transaction Dashboard</h2>
+
+      <div className="dashboard-content">
+        <h2 className="section-title">Transaction Dashboard</h2>
+
         {activeTab === "reports" && (
-          <section style={{ marginBottom: "2rem" }}>
-            <h3>Reports</h3>
-            <ul style={{ textAlign: "left" }}>
-              <li>
-                <strong>Total Sent:</strong> {report.totalSent} EGP
-              </li>
-              <li>
-                <strong>Total Received:</strong> {report.totalReceived} EGP
-              </li>
-              <li>
-                <strong>Number of Transactions:</strong> {report.count}
-              </li>
-              <li>
-                <strong>Highest Transaction:</strong> {report.highest} EGP
-              </li>
-              <li>
-                <strong>Lowest Transaction:</strong> {report.lowest} EGP
-              </li>
-            </ul>
+          <section>
+            <h3 className="section-title">Transaction Reports</h3>
+
+            <div className="reports-grid">
+              <div className="report-card sent">
+                <h4 className="report-label">Total Sent</h4>
+                <p className="report-value">
+                  {parseFloat(sentAnalysis.total_sent || 0).toFixed(2)} EGP
+                </p>
+              </div>
+
+              <div className="report-card received">
+                <h4 className="report-label">Total Received</h4>
+                <p className="report-value">
+                  {parseFloat(receivedAnalysis.total_received || 0).toFixed(2)}{" "}
+                  EGP
+                </p>
+              </div>
+
+              <div className="report-card transactions">
+                <h4 className="report-label">Number of Transactions</h4>
+                <p className="report-value">{report.count}</p>
+              </div>
+            </div>
+
+            <div className="analysis-grid">
+              <div className="analysis-card">
+                <h4 className="analysis-title">Sent Transactions Analysis</h4>
+                <div>
+                  <h5 className="analysis-subtitle">Top Recipients</h5>
+                  {Object.entries(sentAnalysis.receiver_frequencies || {})
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 5)
+                    .map(([receiver, count]) => (
+                      <div key={receiver} className="transaction-item">
+                        <span className="transaction-name">{receiver}</span>
+                        <span className="transaction-count sent">
+                          {count} transactions
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              <div className="analysis-card">
+                <h4 className="analysis-title">
+                  Received Transactions Analysis
+                </h4>
+                <div>
+                  <h5 className="analysis-subtitle">Top Senders</h5>
+                  {Object.entries(receivedAnalysis.sender_frequencies || {})
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 5)
+                    .map(([sender, count]) => (
+                      <div key={sender} className="transaction-item">
+                        <span className="transaction-name">{sender}</span>
+                        <span className="transaction-count received">
+                          {count} transactions
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
           </section>
         )}
+
         {activeTab === "transactions" && (
           <section>
-            <h3>Transaction Logs</h3>
+            <h3 className="section-title">Transaction History</h3>
             {loading ? (
-              <p>Loading logs...</p>
+              <p className="loading-message">Loading transactions...</p>
             ) : error ? (
-              <p className="error">{error}</p>
+              <p className="error-message">{error}</p>
             ) : logs && logs.length > 0 ? (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Sender</th>
-                    <th>Receiver</th>
-                    <th>Amount</th>
-                    <th>Type</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs.map((log, idx) => (
-                    <tr key={idx}>
-                      <td>
-                        {log.timestamp
-                          ? new Date(log.timestamp).toLocaleString()
-                          : "N/A"}
-                      </td>
-                      <td>{log.sender}</td>
-                      <td>{log.receiver}</td>
-                      <td>{parseFloat(log.amount).toFixed(2)} EGP</td>
-                      <td>
-                        {log.sender === user.username
-                          ? "Sent"
-                          : log.receiver === user.username
-                          ? "Received"
-                          : ""}
-                      </td>
+              <div className="transactions-container">
+                <table className="transactions-table">
+                  <thead className="table-header">
+                    <tr>
+                      <th>Date</th>
+                      <th>Sender</th>
+                      <th>Receiver</th>
+                      <th className="amount">Amount</th>
+                      <th className="type">Type</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {logs.map((log, idx) => (
+                      <tr key={idx} className="table-row">
+                        <td className="table-cell date">
+                          {log.time
+                            ? new Date(log.time).toLocaleString()
+                            : "N/A"}
+                        </td>
+                        <td className="table-cell">{log.sender}</td>
+                        <td className="table-cell">{log.receiver}</td>
+                        <td className="table-cell amount">
+                          {parseFloat(log.amount).toFixed(2)} EGP
+                        </td>
+                        <td className="table-cell type">
+                          <span
+                            className={`transaction-badge ${
+                              log.sender === user.username ? "sent" : "received"
+                            }`}
+                          >
+                            {log.sender === user.username ? "Sent" : "Received"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
-              <p>No transactions found.</p>
+              <p className="no-transactions">No transactions found.</p>
             )}
           </section>
         )}
