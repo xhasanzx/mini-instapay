@@ -146,7 +146,7 @@ def addBalance(request):
 
     get_user_response = requests.get(
         'http://127.0.0.1:8000/user/profile/',
-        json={'username':username}
+        params={'username': username}
     )
     
     if get_user_response.status_code != 200:
@@ -158,7 +158,7 @@ def addBalance(request):
     
     user_update_response = requests.post(
         'http://127.0.0.1:8000/user/update/',
-        json={'username': username, 'balance': newBalance}
+        json={'username': username, 'balance': str(newBalance)}
     )
     
     if user_update_response.status_code != 200:

@@ -79,28 +79,25 @@ def register(request):
     return JsonResponse({"error": "POST method required"}, status=400)
 
 
+@csrf_exempt
 def viewAccount(request):
-    if request.method == 'GET':
-        username = request.GET.get('username')
-        password = request.GET.get('password')
+    if request.method != 'GET':
+        return JsonResponse({"error": "GET method required"}, status=405)
+    
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({"error": "Username is required"}, status=400)
         
-        try:
-            if password:
-                # If password is provided, validate credentials
-                user = User.objects.get(username=username, password=password)
-            else:
-                # If no password provided, just get user by username
-                user = User.objects.get(username=username)
-                
-            return JsonResponse({
-                "username": user.username,
-                "password": user.password,
-                "balance": str(user.balance)
-            })
-        except User.DoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
-        
-    return JsonResponse({"error": "GET method required"}, status=400)
+    try:
+        user = User.objects.get(username=username)
+            
+        return JsonResponse({
+            "username": user.username,
+            "password": user.password,
+            "balance": str(user.balance)
+        })
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
 
 
 @csrf_exempt
