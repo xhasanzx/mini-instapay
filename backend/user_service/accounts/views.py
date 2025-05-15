@@ -31,39 +31,72 @@ def getAllUsers(request):
     
     return JsonResponse({"error": "GET method required"}, status=400)
     
+@csrf_exempt
 def logIn(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
         try:
-            user = User.objects.get(username=username, password=password)
-            return JsonResponse({"message": "Login successful", "username": user.username})
-        except User.DoesNotExist:
-            return JsonResponse({"error": "Invalid credentials"}, status=401)
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+            
+            if not username or not password:
+                return JsonResponse({"error": "Username and password are required"}, status=400)
+            
+            try:
+                user = User.objects.get(username=username, password=password)
+                return JsonResponse({
+                    "message": "Login successful",
+                    "username": user.username
+                })
+            except User.DoesNotExist:
+                return JsonResponse({"error": "Invalid credentials"}, status=401)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
     
     return JsonResponse({"error": "POST method required"}, status=400)
 
-
+@csrf_exempt
 def register(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        if User.objects.filter(username=username).exists():
-            return JsonResponse({"error": "Username already taken"}, status=400)
-        
-        User.objects.create(username=username, password=password)
-        return JsonResponse({"message": "User registered successfully"})
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+            
+            if not username or not password:
+                return JsonResponse({"error": "Username and password are required"}, status=400)
+            
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({"error": "Username already taken"}, status=400)
+            
+            user = User.objects.create(username=username, password=password)
+            return JsonResponse({
+                "message": "User registered successfully",
+                "username": user.username
+            })
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
     
     return JsonResponse({"error": "POST method required"}, status=400)
 
 
 def viewAccount(request):
     if request.method == 'GET':
-        username = request.GET.get('username')        
+        username = request.GET.get('username')
+        password = request.GET.get('password')
+        
         try:
-            user = User.objects.get(username=username)
+            if password:
+                # If password is provided, validate credentials
+                user = User.objects.get(username=username, password=password)
+            else:
+                # If no password provided, just get user by username
+                user = User.objects.get(username=username)
+                
             return JsonResponse({
                 "username": user.username,
                 "password": user.password,
