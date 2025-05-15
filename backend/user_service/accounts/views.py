@@ -4,11 +4,8 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from decimal import Decimal, InvalidOperation
 import json
 
-# Create your views here.
-def home(request):        
-    return JsonResponse({"message": "Welcome to the homepage"})
 
-    
+@csrf_exempt
 def getAllUsers(request):    
     if request.method == 'GET':       
         try:            
@@ -26,35 +23,33 @@ def getAllUsers(request):
     
     return JsonResponse({"error": "GET method required"}, status=400)
     
+
+@csrf_exempt
+def logIn(request):    
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST method required"}, status=405)
     
-@ensure_csrf_cookie
-def logIn(request):
-    if request.method == 'POST':
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return JsonResponse({"error": "Username and password are required"}, status=400)
+        
         try:
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
-            
-            if not username or not password:
-                return JsonResponse({"error": "Username and password are required"}, status=400)
-            
-            try:
-                user = User.objects.get(username=username, password=password)
-                return JsonResponse({
-                    "message": "Login successful",
-                    "username": user.username
-                })
-            except User.DoesNotExist:
-                return JsonResponse({"error": "Invalid credentials"}, status=401)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    elif request.method == 'GET':
-        # Return CSRF token for GET requests
-        return JsonResponse({"message": "CSRF cookie set"})
-    
-    return JsonResponse({"error": "POST method required"}, status=400)
+            user = User.objects.get(username=username, password=password)
+            return JsonResponse({
+                "message": "Login successful",
+                "username": user.username
+            })
+        except User.DoesNotExist:
+            return JsonResponse({"error": "Invalid credentials"}, status=401)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+        
 
 @csrf_exempt
 def register(request):
@@ -83,28 +78,25 @@ def register(request):
     return JsonResponse({"error": "POST method required"}, status=400)
 
 
+@csrf_exempt
 def viewAccount(request):
-    if request.method == 'GET':
-        username = request.GET.get('username')
-        password = request.GET.get('password')
+    if request.method != 'GET':
+        return JsonResponse({"error": "GET method required"}, status=405)
+    
+    username = request.GET.get('username')
+    if not username:
+        return JsonResponse({"error": "Username is required"}, status=400)
         
-        try:
-            if password:
-                # If password is provided, validate credentials
-                user = User.objects.get(username=username, password=password)
-            else:
-                # If no password provided, just get user by username
-                user = User.objects.get(username=username)
-                
-            return JsonResponse({
-                "username": user.username,
-                "password": user.password,
-                "balance": str(user.balance)
-            })
-        except User.DoesNotExist:
-            return JsonResponse({"error": "User not found"}, status=404)
-        
-    return JsonResponse({"error": "GET method required"}, status=400)
+    try:
+        user = User.objects.get(username=username)
+            
+        return JsonResponse({
+            "username": user.username,
+            "password": user.password,
+            "balance": str(user.balance)
+        })
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
 
 
 @csrf_exempt
