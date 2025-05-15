@@ -85,6 +85,6 @@ def analyzeReceived(request):
         users[sender] = users.get(sender, 0) + 1
 
     return JsonResponse({
-        'total_sent': str(total_received),
-        'receiver_frequencies': users
+        'total_received': str(total_received),
+        'sender_frequencies': users
     })
