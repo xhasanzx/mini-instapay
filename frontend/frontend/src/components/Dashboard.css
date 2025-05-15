@@ -1,0 +1,244 @@
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-sidebar {
+  width: 220px;
+  background: #222;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+}
+
+.dashboard-sidebar h2 {
+  color: #fff;
+  margin-bottom: 2rem;
+}
+
+.sidebar-button {
+  background: transparent;
+  color: #fff;
+  border: none;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.sidebar-button.active {
+  background: #007bff;
+}
+
+.sidebar-link {
+  color: #fff;
+  text-decoration: none;
+  padding: 1rem;
+  border-radius: 4px;
+  background: transparent;
+  font-weight: bold;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.section-title {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Reports Section */
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.report-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.report-card.sent {
+  border-top: 4px solid #007bff;
+}
+
+.report-card.received {
+  border-top: 4px solid #28a745;
+}
+
+.report-card.transactions {
+  border-top: 4px solid #ffc107;
+}
+
+.report-label {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.report-value {
+  color: #333;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.analysis-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-title {
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.analysis-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.transaction-name {
+  color: #333;
+}
+
+.transaction-count {
+  font-weight: 500;
+}
+
+.transaction-count.sent {
+  color: #007bff;
+}
+
+.transaction-count.received {
+  color: #28a745;
+}
+
+/* Transactions Section */
+.transactions-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table-header {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table-header th {
+  padding: 1rem;
+  text-align: left;
+  color: #495057;
+  font-weight: 600;
+}
+
+.table-header th.amount {
+  text-align: right;
+}
+
+.table-header th.type {
+  text-align: center;
+}
+
+.table-row {
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.2s;
+}
+
+.table-row:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.table-cell {
+  padding: 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.table-cell.date {
+  color: #666;
+}
+
+.table-cell.amount {
+  text-align: right;
+}
+
+.table-cell.type {
+  text-align: center;
+}
+
+.transaction-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: white;
+}
+
+.transaction-badge.sent {
+  background-color: #dc3545;
+}
+
+.transaction-badge.received {
+  background-color: #28a745;
+}
+
+.loading-message {
+  text-align: center;
+  color: #666;
+}
+
+.error-message {
+  color: #dc3545;
+  padding: 1rem;
+  background-color: #f8d7da;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.no-transactions {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}

@@ -1,4 +1,5 @@
-django
-django-rest-framework
+Django>=4.2.0
+djangorestframework>=3.14.0
+django-cors-headers>=4.3.0
 gunicorn
 
