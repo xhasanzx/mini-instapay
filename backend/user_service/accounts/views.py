@@ -4,11 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation
 import json
 
-# Create your views here.
-def home(request):        
-    return JsonResponse({"message": "Welcome to the homepage"})
 
-    
+@csrf_exempt
 def getAllUsers(request):    
     if request.method == 'GET':       
         try:            
@@ -26,31 +23,33 @@ def getAllUsers(request):
     
     return JsonResponse({"error": "GET method required"}, status=400)
     
+
+@csrf_exempt
+def logIn(request):    
+    if request.method != 'POST':
+        return JsonResponse({"error": "POST method required"}, status=405)
     
-def logIn(request):
-    if request.method == 'POST':
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return JsonResponse({"error": "Username and password are required"}, status=400)
+        
         try:
-            data = json.loads(request.body)
-            username = data.get('username')
-            password = data.get('password')
-            
-            if not username or not password:
-                return JsonResponse({"error": "Username and password are required"}, status=400)
-            
-            try:
-                user = User.objects.get(username=username, password=password)
-                return JsonResponse({
-                    "message": "Login successful",
-                    "username": user.username
-                })
-            except User.DoesNotExist:
-                return JsonResponse({"error": "Invalid credentials"}, status=401)
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    
-    return JsonResponse({"error": "POST method required"}, status=400)
+            user = User.objects.get(username=username, password=password)
+            return JsonResponse({
+                "message": "Login successful",
+                "username": user.username
+            })
+        except User.DoesNotExist:
+            return JsonResponse({"error": "Invalid credentials"}, status=401)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+        
 
 @csrf_exempt
 def register(request):

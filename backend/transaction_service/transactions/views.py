@@ -171,6 +171,7 @@ def addBalance(request):
         'newBalance': str(newBalance)}, status=200)
 
 
+@csrf_exempt
 def saveTransaction(sender, receiver, amount):    
     if not all ([sender, receiver, amount]):
         return JsonResponse({'error saving transaction': 'missing required field'}, status=400)
