@@ -3,9 +3,11 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "3000:3000"
     depends_on:
       - user_service
+      - transaction_service
+      - reporting_service
 
   user_service:
     build: ./backend/user_service
@@ -17,13 +19,20 @@ services:
   transaction_service:
     build: ./backend/transaction_service
     ports:
-      - "8001:8000"
+      - "8001:8001"
     volumes:
       - ./backend/transaction_service:/app
 
   reporting_service:
     build: ./backend/reporting_service
     ports:
-      - "8002:8000"
+      - "8002:8002"
     volumes:
       - ./backend/reporting_service:/app
+
+  notification_service:
+    build: ./backend/notification_service
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend/notification_service:/app
