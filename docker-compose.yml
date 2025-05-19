@@ -8,6 +8,7 @@ services:
       - user_service
       - transaction_service
       - reporting_service
+      - notification_service
 
   user_service:
     build: ./backend/user_service
