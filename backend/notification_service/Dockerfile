@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 8003
 
-CMD [ "python", "manage.py", "runserver", "8003" ]
+CMD [ "python", "manage.py", "runserver", "0.0.0.0:8003" ]
