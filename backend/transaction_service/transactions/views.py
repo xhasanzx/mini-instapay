@@ -28,15 +28,15 @@ def send(request):
 
     # Get sender from user service
     user_response = requests.get(
-    'http://127.0.0.1:8000/user/profile/',
-    params={'username': username, 'password': password}
+        'http://user_service:8000/user/profile/',
+        params={'username': username, 'password': password}
     )
     if user_response.status_code != 200:
         return JsonResponse({'error': 'Invalid sender credentials'}, status=404)
     
     # Get receiver from user service
     receiver_response = requests.get(
-        'http://127.0.0.1:8000/user/profile/',
+        'http://user_service/user/profile/',
         params={'username': receiver_name}
     )
     if receiver_response.status_code != 200:
@@ -59,7 +59,13 @@ def send(request):
 
     saveTransaction(sender=username, receiver=receiver_name, amount=amount)
 
+    notification_response = requests.post(
+        'http://notification_service:8003/notifications/request/',
+        json={'username': username, 'requester': receiver_name, 'amount': amount}
+    )
     
+    if notification_response.status_code != 200:
+        return JsonResponse({'error': 'Failed to send notification'}, status=500)
     
     return JsonResponse({
         "message": "Transaction successful",
@@ -89,7 +95,7 @@ def request_money(request):
 
     # Get sender from user service
     requester_response = requests.get(
-        'http://127.0.0.1:8000/user/profile/',
+        'http://user_service:8000/user/profile/',
         params={'username': requester}
     )
     if requester_response.status_code != 200:
@@ -97,7 +103,7 @@ def request_money(request):
     
     # Get receiver from user service
     user_response = requests.get(
-        'http://127.0.0.1:8000/user/profile/',
+        'http://user_service:8000/user/profile/',
         params={'username': username}
     )
     if user_response.status_code != 200:

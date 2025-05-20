@@ -34,10 +34,9 @@ def request_notification(request):
     data = json.loads(request.body)
     username = data.get('username')
     requester = data.get('requester')
-    amount = str(data.get('amount'))
-    request_id = data.get('request_id')
-        
-    message = f"{requester} requested {amount}$, request id: {request_id}"
+    amount = str(data.get('amount'))    
+    
+    message = f"{requester} requested {amount}$"
     Notification.objects.create(username=username, message=message, type='requested')
     Request.objects.create(username=username, requester=requester, amount=amount)    
     return JsonResponse({'message': 'Notification created successfully'}, status=200)
@@ -72,7 +71,7 @@ def get_requests(request):
 @csrf_exempt
 def getUser(username):
     user_response = requests.get(
-        'http://127.0.0.1:8000/user/profile/',
+        'http://user_service/user/profile/',
         params={'username': username}
     )
     if user_response.status_code != 200:
@@ -109,7 +108,7 @@ def send_money(request):
     amount = request.amount
     
     send_money_response = requests.post(
-        'http://127.0.0.1:8001/transaction/send-money/',
+        'http://transaction_service/transaction/send-money/',
         data={
             'username': user,
             'sender': sender,
