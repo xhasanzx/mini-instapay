@@ -4,17 +4,28 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Try to get user from localStorage
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
+    try {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error("Error reading user from localStorage:", error);
+      return null;
+    }
   });
-  const isAuthenticated = !!user;
+
+  const [isAuthenticated, setIsAuthenticated] = useState(!!user);
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-    } else {
-      localStorage.removeItem("user");
+    try {
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+        setIsAuthenticated(true);
+      } else {
+        localStorage.removeItem("user");
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error("Error managing user in localStorage:", error);
     }
   }, [user]);
 
@@ -30,13 +41,15 @@ export const AuthProvider = ({ children }) => {
     setUser(userObj);
   };
 
-  return (
-    <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = {
+    user,
+    isAuthenticated,
+    login,
+    logout,
+    register,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

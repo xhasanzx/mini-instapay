@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import Notifications from "./Notifications";
+import Navbar from "./Navbar";
 import "./Dashboard.css";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,8 +26,22 @@ const Dashboard = () => {
     sender_frequencies: {},
   });
   const [activeTab, setActiveTab] = useState("transactions");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  console.log("Dashboard rendered, isMenuOpen:", isMenuOpen);
+
+  const toggleMenu = () => {
+    console.log("toggleMenu called, current isMenuOpen:", isMenuOpen);
+    setIsMenuOpen((prevState) => {
+      const newState = !prevState;
+      console.log("Setting isMenuOpen to:", newState);
+      return newState;
+    });
+  };
 
   useEffect(() => {
+    if (!user || !user.username) return;
+
     const fetchLogs = async () => {
       setLoading(true);
       setError("");
@@ -113,14 +129,14 @@ const Dashboard = () => {
       }
     };
 
-    if (user && user.username) {
-      fetchLogs();
-      fetchReports();
-    }
+    fetchLogs();
+    fetchReports();
   }, [user]);
 
   useEffect(() => {
-    if (logs && logs.length > 0) {
+    if (!logs || !user) return;
+
+    if (logs.length > 0) {
       let totalSent = 0;
       let totalReceived = 0;
       let highest = Number.MIN_VALUE;
@@ -152,17 +168,34 @@ const Dashboard = () => {
         lowest: 0,
       });
     }
-  }, [logs, user]);
+  }, [logs, user, sentAnalysis.total_sent, receivedAnalysis.total_received]);
+
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  // If user is not loaded yet, show loading state
+  if (!user) {
+    return <div className="loading-message">Loading...</div>;
+  }
+
+  console.log("Rendering Dashboard with isMenuOpen:", isMenuOpen);
 
   return (
     <div className="dashboard-container">
-      <nav className="dashboard-sidebar">
+      <Navbar isMenuOpen={isMenuOpen} toggleMenu={toggleMenu} />
+
+      <aside className={`dashboard-sidebar ${isMenuOpen ? "open" : ""}`}>
         <h2>Dashboard</h2>
         <button
           className={`sidebar-button ${
             activeTab === "transactions" ? "active" : ""
           }`}
-          onClick={() => setActiveTab("transactions")}
+          onClick={() => {
+            setActiveTab("transactions");
+            setIsMenuOpen(false);
+          }}
         >
           Transactions
         </button>
@@ -170,17 +203,42 @@ const Dashboard = () => {
           className={`sidebar-button ${
             activeTab === "reports" ? "active" : ""
           }`}
-          onClick={() => setActiveTab("reports")}
+          onClick={() => {
+            setActiveTab("reports");
+            setIsMenuOpen(false);
+          }}
         >
           Reports
         </button>
-        <Link to="/" className="sidebar-link">
+        <button
+          className={`sidebar-button ${
+            activeTab === "notifications" ? "active" : ""
+          }`}
+          onClick={() => {
+            setActiveTab("notifications");
+            setIsMenuOpen(false);
+          }}
+        >
+          Notifications
+        </button>
+        <Link
+          to="/"
+          className="sidebar-link"
+          onClick={() => setIsMenuOpen(false)}
+        >
           Home
         </Link>
-      </nav>
+      </aside>
 
-      <div className="dashboard-content">
+      <main className={`dashboard-content ${isMenuOpen ? "shifted" : ""}`}>
         <h2 className="section-title">Transaction Dashboard</h2>
+
+        {activeTab === "notifications" && (
+          <section>
+            <h3 className="section-title">Notifications</h3>
+            <Notifications username={user.username} />
+          </section>
+        )}
 
         {activeTab === "reports" && (
           <section>
@@ -301,7 +359,15 @@ const Dashboard = () => {
             )}
           </section>
         )}
-      </div>
+      </main>
+
+      <div
+        className={`overlay ${isMenuOpen ? "visible" : ""}`}
+        onClick={() => {
+          console.log("Overlay clicked, closing menu");
+          setIsMenuOpen(false);
+        }}
+      />
     </div>
   );
 };

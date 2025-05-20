@@ -1,77 +1,30 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Home from "./components/Home";
+import Dashboard from "./components/Dashboard";
 import LoginForm from "./components/auth/LoginForm";
 import RegisterForm from "./components/auth/RegisterForm";
-import Home from "./components/Home";
-import Profile from "./components/Profile";
-import Dashboard from "./components/Dashboard";
+import Layout from "./components/Layout";
 import "./App.css";
-
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
-
-const AuthRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return !isAuthenticated ? children : <Navigate to="/" />;
-};
-
-const AppRoutes = () => {
-  return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <AuthRoute>
-            <LoginForm />
-          </AuthRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <AuthRoute>
-            <RegisterForm />
-          </AuthRoute>
-        }
-      />
-    </Routes>
-  );
-};
+import Notifications from "./components/Notifications";
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="App">
-          <AppRoutes />
-        </div>
+        <Routes>
+          {/* Public routes without sidebar/navbar */}
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+
+          {/* All other routes use the Layout */}
+          <Route element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/notifications" element={<Notifications />} />
+          </Route>
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

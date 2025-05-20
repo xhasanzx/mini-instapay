@@ -3,12 +3,19 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import SendMoneyForm from "./SendMoneyForm";
 import RequestMoneyForm from "./RequestMoneyForm";
+import Navbar from "./Navbar";
+import "./Home.css";
 
 const Home = () => {
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [balance, setBalance] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prevState) => !prevState);
+  };
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -35,42 +42,75 @@ const Home = () => {
     if (user) fetchBalance();
   }, [user]);
 
-  // Callback to update balance after sending/requesting money
   const handleBalanceUpdate = (newBalance) => {
     setBalance(newBalance);
   };
 
   return (
     <div className="home-container">
-      <nav className="home-nav">
-        <h1>Mini InstaPay</h1>
-        <div className="user-section">
-          <span>Welcome, {user?.username}!</span>
-          <Link to="/dashboard" className="auth-link">
-            Dashboard
-          </Link>
-          <Link to="/profile" className="auth-link">
-            Profile
-          </Link>
-          <button onClick={logout} className="logout-btn">
-            Logout
-          </button>
+      <Navbar isMenuOpen={isMenuOpen} toggleMenu={toggleMenu} />
+
+      {!isAuthenticated ? (
+        <>
+          <div className="hero-section">
+            <h1>Welcome to InstaPay</h1>
+            <p>Fast, secure, and convenient money transfers</p>
+            <div className="cta-buttons">
+              <Link to="/login" className="cta-button login">
+                Login
+              </Link>
+              <Link to="/register" className="cta-button register">
+                Register
+              </Link>
+            </div>
+          </div>
+
+          <div className="features-section">
+            <h2>Why Choose InstaPay?</h2>
+            <div className="features-grid">
+              <div className="feature-card">
+                <h3>Fast Transfers</h3>
+                <p>Send money instantly to anyone, anywhere</p>
+              </div>
+              <div className="feature-card">
+                <h3>Secure</h3>
+                <p>Your transactions are protected with advanced security</p>
+              </div>
+              <div className="feature-card">
+                <h3>Easy to Use</h3>
+                <p>Simple and intuitive interface for all users</p>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="home-content">
+          <div className="balance-section">
+            <h2>Welcome to InstaPay</h2>
+            {loading ? (
+              <p>Loading balance...</p>
+            ) : error ? (
+              <p className="error">{error}</p>
+            ) : (
+              <div className="balance-card">
+                <h3>Your Balance</h3>
+                <p className="balance-amount">{balance} EGP</p>
+              </div>
+            )}
+          </div>
+
+          <div className="transfer-forms">
+            <div className="form-section">
+              <h3>Send Money</h3>
+              <SendMoneyForm onBalanceUpdate={handleBalanceUpdate} />
+            </div>
+            <div className="form-section">
+              <h3>Request Money</h3>
+              <RequestMoneyForm onBalanceUpdate={handleBalanceUpdate} />
+            </div>
+          </div>
         </div>
-      </nav>
-      <div className="home-content">
-        <h2>Welcome to Mini InstaPay</h2>
-        {loading ? (
-          <p>Loading balance...</p>
-        ) : error ? (
-          <p className="error">{error}</p>
-        ) : (
-          <p>
-            <strong>Balance:</strong> {balance} EGP
-          </p>
-        )}
-        <SendMoneyForm onBalanceUpdate={handleBalanceUpdate} />
-        <RequestMoneyForm onBalanceUpdate={handleBalanceUpdate} />
-      </div>
+      )}
     </div>
   );
 };
