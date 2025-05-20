@@ -5,35 +5,46 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - user_service
-      - transaction_service
-      - reporting_service
-      - notification_service
+      - user-service
+      - transaction-service
+      - reporting-service
+      - notification-service
 
-  user_service:
+  user-service:
     build: ./backend/user_service
     ports:
       - "8000:8000"
     volumes:
       - ./backend/user_service:/app
+    environment:
+      - USER_SERVICE_PORT=8000
 
-  transaction_service:
+  transaction-service:
     build: ./backend/transaction_service
     ports:
       - "8001:8001"
     volumes:
       - ./backend/transaction_service:/app
+    environment:
+      - TRANSACTION_SERVICE_PORT=8001
 
-  reporting_service:
+
+  reporting-service:
     build: ./backend/reporting_service
     ports:
       - "8002:8002"
     volumes:
       - ./backend/reporting_service:/app
+    environment:
+      - REPORTING_SERVICE_PORT=8002
 
-  notification_service:
+
+  notification-service:
     build: ./backend/notification_service
     ports:
       - "8003:8003"
     volumes:
       - ./backend/notification_service:/app
+    environment:
+      - NOTIFICATION_SERVICE_PORT=8003
+

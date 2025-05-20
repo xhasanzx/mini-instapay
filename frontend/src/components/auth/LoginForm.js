@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 const LoginForm = () => {
+  const navigate = useNavigate();
   const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +25,7 @@ const LoginForm = () => {
         setError(data.error || "Login failed");
       } else {
         login({ ...data, password });
+        navigate("/");
       }
     } catch (err) {
       setError("Network error");
@@ -55,7 +57,7 @@ const LoginForm = () => {
             />
           </div>
           {error && <div className="error">{error}</div>}
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} onClick={handleSubmit}>
             {loading ? "Logging in..." : "Login"}
           </button>
           <p className="auth-switch">
