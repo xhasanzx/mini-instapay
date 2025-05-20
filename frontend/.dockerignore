@@ -1,0 +1,17 @@
+node_modules
+.git
+.gitignore
+Dockerfile
+.dockerignore
+*.md
+*.log
+*.env
+coverage
+build/static/js/*.map
+build/static/css/*.map
+build/static/media
+build/index.html
+build/favicon.ico
+build/robots.txt
+build/manifest.json
+
