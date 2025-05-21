@@ -7,10 +7,7 @@ import Dashboard from "./Dashboard";
 const Navbar = ({ isMenuOpen = false, toggleMenu = () => {} }) => {
   const { user, logout } = useAuth();
 
-  console.log("Navbar rendered, isMenuOpen:", isMenuOpen);
-
   const handleMenuClick = () => {
-    console.log("Menu button clicked");
     if (typeof toggleMenu === "function") {
       toggleMenu();
     }

@@ -28,7 +28,7 @@ def send(request):
 
     # Get sender from user service
     user_response = requests.get(
-    'http://user-service:8000/user/profile/',
+        'http://user-service:8000/user/profile/',
         params={'username': username, 'password': password}
     )
     if user_response.status_code != 200:
@@ -46,10 +46,7 @@ def send(request):
     receiver_data = receiver_response.json()
 
     user_balance = Decimal(user_data['balance'])
-    print(user_balance)
     receiver_balance = Decimal(receiver_data['balance'])
-    print(receiver_balance)
-    print(amount)
 
     if user_balance < amount:
         return JsonResponse({"error": "Insufficent funds"}, status=401)       
@@ -62,14 +59,6 @@ def send(request):
 
     saveTransaction(sender=username, receiver=receiver_name, amount=amount)
 
-    # notification_response = requests.post(
-    #     'http://notification-service:8003/notifications/request/',
-    #     json={'username': username, 'requester': receiver_name, 'amount': str(amount)}
-    # )
-    
-    # if notification_response.status_code != 200:
-    #     return JsonResponse({'error': 'Failed to send notification'}, status=500)
-    
     return JsonResponse({
         "message": "Transaction successful",
         "updated_balance": str(user_balance)
@@ -131,8 +120,8 @@ def addBalance(request):
 
     try:
         balance = Decimal(balance)
-        if balance <= 0:
-            return JsonResponse({"error": "Balance cannot be negative or zero"}, status=400)
+        if balance < 0:
+            return JsonResponse({"error": "Balance cannot be negative"}, status=400)
     except (InvalidOperation, TypeError):
         return JsonResponse({"error": "Invalid balance"}, status=400)
 
@@ -146,11 +135,9 @@ def addBalance(request):
     
     user_data = get_user_response.json()
     
-    newBalance = Decimal(user_data['balance']) + balance
-    
     user_update_response = requests.post(
         'http://user-service:8000/user/update/',
-        json={'username': username, 'balance': str(newBalance)}
+        json={'username': username, 'balance': str(balance)}
     )
     
     if user_update_response.status_code != 200:
@@ -160,7 +147,7 @@ def addBalance(request):
         'message': 'balance updated successfully',
         'username': username,
         'oldBalance': str(user_data['balance']),
-        'newBalance': str(newBalance)}, status=200)
+        'newBalance': str(balance)}, status=200)
 
 
 def saveTransaction(sender, receiver, amount):    
@@ -199,9 +186,9 @@ def updateBalance(username, balance):
         return JsonResponse({'error': 'Missing required fields'}, status=400)
             
     try:
-        update_user_response = requests.get(
+        update_user_response = requests.post(
             'http://user-service:8000/user/update/',
-            params={'username': username, 'balance': balance}
+            json={'username': username, 'balance': str(balance)}
         )
         if update_user_response.status_code != 200:
             return JsonResponse({'error': 'User not found'}, status=404)

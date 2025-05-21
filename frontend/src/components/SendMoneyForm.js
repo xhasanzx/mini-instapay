@@ -31,18 +31,8 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
         setAmount("");
         setReceiverName("");
         // Update balance for the sender
-        if (data.updated_balance) {
-          await fetch("http://localhost:8001/transaction/addBalance/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username: user.username,
-              balance: data.updated_balance,
-            }),
-          });
-          if (onBalanceUpdate) {
-            onBalanceUpdate(data.updated_balance);
-          }
+        if (data.updated_balance && onBalanceUpdate) {
+          onBalanceUpdate(data.updated_balance);
         }
       } else {
         setError(data.error || "Transaction failed.");

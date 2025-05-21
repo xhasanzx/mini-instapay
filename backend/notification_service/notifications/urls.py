@@ -7,4 +7,6 @@ urlpatterns = [
     path('notifications/sent/', views.sent_notification, name='sent_notification'),
     path('notifications/received/', views.received_notification, name='received_notification'),
     path('notifications/all-notifications/', views.get_notifications, name='get_notifications'),
+    path('notifications/approve-request/', views.approve_request, name='approve_request'),
+    path('notifications/reject-request/', views.reject_request, name='reject_request'),
 ]
