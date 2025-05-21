@@ -56,7 +56,7 @@ const LoginForm = () => {
           </div>
           {error && <div className="error">{error}</div>}
           <button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            <Link to="/">{loading ? "Logging in..." : "Login"}</Link>
           </button>
           <p className="auth-switch">
             Don't have an account?{" "}
