@@ -21,7 +21,14 @@ const LoginForm = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
-      });
+      });      
+      if (!response.ok) {
+        response = await fetch(`http://192.168.58.2:30001/user/login/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+      }
       const data = await response.json();
       if (!response.ok) {
         setError(data.error || "Login failed");
