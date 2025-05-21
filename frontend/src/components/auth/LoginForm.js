@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import config from "../../config";
+
 const LoginForm = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -15,7 +17,7 @@ const LoginForm = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:8000/user/login/", {
+      const response = await fetch(`${config.API_URL}/user/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

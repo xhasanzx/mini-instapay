@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import config from "../config";
 
 const RequestMoneyForm = ({ onBalanceUpdate }) => {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ const RequestMoneyForm = ({ onBalanceUpdate }) => {
     setError("");
     try {
       const response = await fetch(
-        "http://localhost:8001/transaction/receive",
+        `${config.TRANSACTION_URL}/transaction/receive`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import config from "../config";
 import "./Notifications.css";
 
 const Notifications = ({ username }) => {
@@ -11,7 +12,7 @@ const Notifications = ({ username }) => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8002/notifications/all-notifications/",
+        `${config.NOTIFICATION_URL}/notifications/all-notifications/`,
         {
           params: { username },
         }
@@ -27,7 +28,7 @@ const Notifications = ({ username }) => {
   const fetchRequests = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8002/notifications/all-requests/",
+        `${config.NOTIFICATION_URL}/notifications/all-requests/`,
         {
           params: { username },
         }
@@ -54,7 +55,7 @@ const Notifications = ({ username }) => {
 
   const handleApproveRequest = async (requestId) => {
     try {
-      await axios.post("http://localhost:8002/notifications/approve-request/", {
+      await axios.post(`${config.NOTIFICATION_URL}/notifications/approve-request/`, {
         request_id: requestId,
       });
       // Refresh requests after approval
