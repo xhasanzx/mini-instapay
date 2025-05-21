@@ -4,6 +4,7 @@ import { Link, Navigate } from "react-router-dom";
 import Notifications from "./Notifications";
 import Navbar from "./Navbar";
 import "./Dashboard.css";
+import config from "../config";
 
 const Dashboard = () => {
   const { user, isAuthenticated } = useAuth();
@@ -47,7 +48,7 @@ const Dashboard = () => {
       setError("");
       try {
         const response = await fetch(
-          `http://localhost:8001/transaction/logs/?username=${user.username}`
+          `${config.TRANSACTION_URL}/transaction/logs/?username=${user.username}`
         );
         const data = await response.json();
         if (response.ok) {
@@ -75,7 +76,7 @@ const Dashboard = () => {
       try {
         // Fetch sent analysis
         const sentResponse = await fetch(
-          "http://localhost:8002/reports/sent/",
+          `${config.REPORTING_URL}/reports/sent/`,
           {
             method: "POST",
             headers: {
@@ -96,7 +97,7 @@ const Dashboard = () => {
 
         // Fetch received analysis
         const receivedResponse = await fetch(
-          "http://localhost:8002/reports/received/",
+          `${config.REPORTING_URL}/reports/received/`,
           {
             method: "POST",
             headers: {

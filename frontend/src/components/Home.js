@@ -6,6 +6,7 @@ import RequestMoneyForm from "./RequestMoneyForm";
 import Notifications from "./Notifications";
 import PopupNotification from "./PopupNotification";
 import Navbar from "./Navbar";
+import config from "../config";
 import "./Home.css";
 
 const Home = () => {
@@ -46,7 +47,7 @@ const Home = () => {
         if (user && user.username && user.password) {
           console.log("Fetching balance for user:", user.username);
           const response = await fetch(
-            `http://localhost:8000/user/profile?username=${user.username}&password=${user.password}`
+            `${config.API_URL}/user/profile?username=${user.username}&password=${user.password}`
           );
           const data = await response.json();
           console.log("Balance response:", data);

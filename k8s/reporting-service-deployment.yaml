@@ -17,3 +17,6 @@ spec:
         image: xhassanzx/mini-instapay-reporting-service:latest
         ports:
         - containerPort: 8002
+        env:
+        - name: CORS_ALLOWED_ORIGINS
+          value: "http://192.168.58.2:30000"

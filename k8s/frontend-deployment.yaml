@@ -17,3 +17,4 @@ spec:
         image: xhassanzx/mini-instapay-frontend:latest
         ports:
         - containerPort: 80
+        

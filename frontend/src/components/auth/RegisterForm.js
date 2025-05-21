@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import config from "../../config";
 
 const RegisterForm = () => {
   const { register } = useAuth();
@@ -16,7 +17,7 @@ const RegisterForm = () => {
     setError("");
     setSuccess("");
     try {
-      const response = await fetch("http://localhost:8000/user/register/", {
+      const response = await fetch(`${config.API_URL}/user/register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
