@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import SendMoneyForm from "./SendMoneyForm";
 import RequestMoneyForm from "./RequestMoneyForm";
 import Navbar from "./Navbar";
+import config from "../config";
 import "./Home.css";
 
 const Home = () => {
@@ -24,7 +25,7 @@ const Home = () => {
       try {
         if (user && user.username && user.password) {
           const response = await fetch(
-            `http://localhost:8000/user/profile?username=${user.username}&password=${user.password}`
+            `${config.API_URL}/user/profile?username=${user.username}&password=${user.password}`
           );
           const data = await response.json();
           if (response.ok) {

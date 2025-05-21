@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import config from "../config";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ const Profile = () => {
       setError("");
       try {
         const response = await fetch(
-          `http://localhost:8000/user/profile?username=${user.username}&password=${user.password}`
+          `${config.API_URL}/user/profile?username=${user.username}&password=${user.password}`
         );
         const data = await response.json();
         if (response.ok) {
@@ -41,7 +42,7 @@ const Profile = () => {
     setError("");
     setSuccess("");
     try {
-      const response = await fetch("http://localhost:8000/user/update/", {
+      const response = await fetch(`${config.API_URL}/user/update/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: user.username, balance: editBalance }),

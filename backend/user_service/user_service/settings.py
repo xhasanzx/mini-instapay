@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-6%jh*fs-=h9dro7f(dfonsw9r3afc0yx9*%1h!c9gztp3v&l3_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', '192.168.58.2']
+ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -34,7 +34,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8002",
     "http://localhost:8003",
     "http://127.0.0.1:3000",
-    "http://192.168.58.2:3000",
 ]
 
 # Application definition
@@ -140,7 +139,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.58.2:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -167,7 +165,6 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.58.2:3000",
 ]
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'

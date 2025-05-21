@@ -48,7 +48,7 @@ const Dashboard = () => {
       setError("");
       try {
         const response = await fetch(
-          `http://localhost:8001/transaction/logs/?username=${user.username}`
+          `${config.TRANSACTION_URL}/transaction/logs/?username=${user.username}`
         );
         const data = await response.json();
         if (response.ok) {
