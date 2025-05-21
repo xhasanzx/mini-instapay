@@ -28,7 +28,7 @@ def send(request):
 
     # Get sender from user service
     user_response = requests.get(
-        'http://user_service:8000/user/profile/',
+    'http://user-service:8000/user/profile/',
         params={'username': username, 'password': password}
     )
     if user_response.status_code != 200:
@@ -36,7 +36,7 @@ def send(request):
     
     # Get receiver from user service
     receiver_response = requests.get(
-        'http://user_service/user/profile/',
+        'http://user-service:8000/user/profile/',
         params={'username': receiver_name}
     )
     if receiver_response.status_code != 200:
@@ -59,13 +59,13 @@ def send(request):
 
     saveTransaction(sender=username, receiver=receiver_name, amount=amount)
 
-    notification_response = requests.post(
-        'http://notification_service:8003/notifications/request/',
-        json={'username': username, 'requester': receiver_name, 'amount': amount}
-    )
+    # notification_response = requests.post(
+    #     'http://notification-service:8003/notifications/request/',
+    #     json={'username': username, 'requester': receiver_name, 'amount': str(amount)}
+    # )
     
-    if notification_response.status_code != 200:
-        return JsonResponse({'error': 'Failed to send notification'}, status=500)
+    # if notification_response.status_code != 200:
+    #     return JsonResponse({'error': 'Failed to send notification'}, status=500)
     
     return JsonResponse({
         "message": "Transaction successful",
@@ -95,7 +95,7 @@ def request_money(request):
 
     # Get sender from user service
     requester_response = requests.get(
-        'http://user_service:8000/user/profile/',
+        'http://user-service:8000/user/profile/',
         params={'username': requester}
     )
     if requester_response.status_code != 200:
@@ -103,7 +103,7 @@ def request_money(request):
     
     # Get receiver from user service
     user_response = requests.get(
-        'http://user_service:8000/user/profile/',
+        'http://user-service:8000/user/profile/',
         params={'username': username}
     )
     if user_response.status_code != 200:
@@ -134,7 +134,7 @@ def addBalance(request):
         return JsonResponse({"error": "Invalid balance"}, status=400)
 
     get_user_response = requests.get(
-        'http://127.0.0.1:8000/user/profile/',
+        'http://user-service:8000/user/profile/',
         params={'username': username}
     )
     
@@ -146,7 +146,7 @@ def addBalance(request):
     newBalance = Decimal(user_data['balance']) + balance
     
     user_update_response = requests.post(
-        'http://127.0.0.1:8000/user/update/',
+        'http://user-service:8000/user/update/',
         json={'username': username, 'balance': str(newBalance)}
     )
     
@@ -197,7 +197,7 @@ def updateBalance(username, balance):
             
     try:
         update_user_response = requests.get(
-            'http://127.0.0.1:8000/user/update/',
+            'http://user-service:8000/user/update/',
             params={'username': username, 'balance': balance}
         )
         if update_user_response.status_code != 200:
@@ -216,8 +216,8 @@ def createRequest(username, requester, amount):
     Requests.objects.create(username=username, requester=requester, amount=amount)
     
     response = requests.post(
-        'http://127.0.0.1:8003/notifications/request/',
-        json={'username': username, 'requester': requester, 'amount': amount}
+        'http://notification-service:8003/notifications/request/',
+        json={'username': username, 'requester': requester, 'amount': str(amount)}
     )
     if response.status_code != 200:
         return JsonResponse({'error': 'Failed to create request'}, status=500)

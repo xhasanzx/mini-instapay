@@ -17,7 +17,7 @@ def analyzeSent(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8001/transaction/logs/',
+            'http://transaction-service:8001/transaction/logs/',
             params={'username': username}
         )
         if response.status_code != 200:
@@ -60,7 +60,7 @@ def analyzeReceived(request):
 
     try:
         response = requests.get(
-            'http://127.0.0.1:8001/transaction/logs/',
+            'http://transaction-service:8001/transaction/logs/',
             params={'username': username}
         )
         if response.status_code != 200:

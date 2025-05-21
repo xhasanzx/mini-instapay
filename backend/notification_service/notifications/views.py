@@ -71,7 +71,7 @@ def get_requests(request):
 @csrf_exempt
 def getUser(username):
     user_response = requests.get(
-        'http://user_service/user/profile/',
+        'http://user-service:8000/user/profile/',
         params={'username': username}
     )
     if user_response.status_code != 200:
@@ -108,7 +108,7 @@ def send_money(request):
     amount = request.amount
     
     send_money_response = requests.post(
-        'http://transaction_service/transaction/send-money/',
+        'http://transaction-service:8001/transaction/send-money/',
         data={
             'username': user,
             'sender': sender,
