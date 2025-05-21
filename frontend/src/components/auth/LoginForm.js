@@ -17,34 +17,11 @@ const LoginForm = () => {
     setLoading(true);
     setError("");
     try {
-      let response;
-      try{
-        response = await fetch(`${config.API_URL}/user/login/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        });
-      } catch (err) {
-        setError(data.error || "Login failed");
-      }
-
-      try{        
-        response = await fetch(`http://192.168.58.2:30001/user/login/`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        });
-        const data = await response.json();
-      } catch (err) {
-        setError(data.error || "Login failed");
-      }
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-      } else {
-        login({ ...data, password });
-        navigate("/");
-      }
+      const response = await fetch(`${config.API_URL}/user/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });            
       const data = await response.json();
       if (!response.ok) {
         setError(data.error || "Login failed");
