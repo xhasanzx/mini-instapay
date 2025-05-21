@@ -17,8 +17,7 @@ const LoginForm = () => {
     setLoading(true);
     setError("");
     try {
-      //${config.API_URL}/user/login/
-      const response = await fetch(`http://192.168.58.2:30001/user/login/`, {
+      const response = await fetch(`${config.API_URL}/user/login/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
