@@ -8,6 +8,7 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [transactionSuccess, setTransactionSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,9 +31,13 @@ const SendMoneyForm = ({ onBalanceUpdate }) => {
         setSuccess(data.message || "Transaction successful!");
         setAmount("");
         setReceiverName("");
+
         // Update balance for the sender
         if (data.updated_balance && onBalanceUpdate) {
           onBalanceUpdate(data.updated_balance);
+        }
+        if (transactionSuccess) {
+          setTransactionSuccess(data.message || "Transaction successful!");
         }
       } else {
         setError(data.error || "Transaction failed.");

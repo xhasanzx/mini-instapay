@@ -58,6 +58,27 @@ def send(request):
     updateBalance(receiver_name, receiver_balance)
 
     saveTransaction(sender=username, receiver=receiver_name, amount=amount)
+    try:
+        requests.post(
+            'http://notification-service:8003/notifications/sent/',
+            json={
+                'username': username,
+                'sender': receiver_name,
+                'amount': str(amount)
+            }
+        )
+
+        requests.post(
+            'http://notification-service:8003/notifications/received/',
+            json={
+                'username': receiver_name,
+                'sender': username,
+                'amount': str(amount)
+            }
+        )
+    except Exception as e:
+        print(f"Notification error: {e}")
+
 
     return JsonResponse({
         "message": "Transaction successful",

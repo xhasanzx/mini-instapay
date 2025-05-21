@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def get_notifications(request):
     username = request.GET.get('username')
-    notifications = Notification.objects.filter(username=username)
+    notifications = Notification.objects.filter(username=username).values()
     return JsonResponse({'notifications': list(notifications)})
 
 

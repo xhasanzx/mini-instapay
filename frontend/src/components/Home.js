@@ -16,21 +16,13 @@ const Home = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [popupNotification, setPopupNotification] = useState(null);
 
-  // Debug log for initial render
-  console.log("Home component initial render", {
-    isAuthenticated,
-    user: user?.username,
-    popupNotification,
-  });
-
   const toggleMenu = () => {
     setIsMenuOpen((prevState) => !prevState);
   };
 
   const showNotification = (message) => {
-    // Debug log before setting state
     console.log("showNotification called with message:", message);
-    // Force a console log to ensure it's not a console filtering issue
+    // Force a console log  ensure it's not a console filtering issue
     alert("Notification triggered: " + message);
     setPopupNotification(message);
   };
