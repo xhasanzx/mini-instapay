@@ -111,9 +111,8 @@ def updateUser(request):
         if not all([username, balance]):
             return JsonResponse({"error": "Missing required fields"}, status=400)
         
-        try:
-            balance = Decimal(balance)
-            if balance < 0:
+        try:        
+            if Decimal(balance) < 0:
                 return JsonResponse({"error": "Balance cannot be negative"}, status=400)
         except (InvalidOperation, TypeError):
             return JsonResponse({"error": "Invalid balance"}, status=400)

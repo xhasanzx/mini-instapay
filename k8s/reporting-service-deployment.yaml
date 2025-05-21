@@ -16,4 +16,4 @@ spec:
       - name: reporting-service
         image: xhassanzx/mini-instapay-reporting-service:latest
         ports:
-        - containerPort: 8000 
+        - containerPort: 8002

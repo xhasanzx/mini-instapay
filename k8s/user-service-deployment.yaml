@@ -16,4 +16,4 @@ spec:
       - name: user-service
         image: xhassanzx/mini-instapay-user-service:latest
         ports:
-        - containerPort: 8000 
+        - containerPort: 8000

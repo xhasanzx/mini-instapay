@@ -16,4 +16,4 @@ spec:
       - name: notification-service
         image: xhassanzx/mini-instapay-notification-service:latest
         ports:
-        - containerPort: 8000 
+        - containerPort: 8003

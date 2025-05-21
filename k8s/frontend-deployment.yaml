@@ -16,4 +16,4 @@ spec:
       - name: frontend
         image: xhassanzx/mini-instapay-frontend:latest
         ports:
-        - containerPort: 3000 
+        - containerPort: 80

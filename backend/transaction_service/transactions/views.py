@@ -46,7 +46,10 @@ def send(request):
     receiver_data = receiver_response.json()
 
     user_balance = Decimal(user_data['balance'])
+    print(user_balance)
     receiver_balance = Decimal(receiver_data['balance'])
+    print(receiver_balance)
+    print(amount)
 
     if user_balance < amount:
         return JsonResponse({"error": "Insufficent funds"}, status=401)       

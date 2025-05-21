@@ -7,6 +7,6 @@ spec:
     app: notification-service
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
-  type: NodePort 
+      port: 8003
+      targetPort: 8003
+  type: ClusterIP 
